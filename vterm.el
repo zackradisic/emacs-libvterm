@@ -888,7 +888,7 @@ Optional argument RESET clears all the errors."
   (interactive "p")
   (let* ((pt (point))
          (default-directory default-directory)
-         (pwd (vterm--get-pwd)))
+         (pwd (if (fboundp 'projectile-project-root) (projectile-project-root) (vterm--get-pwd))))
     (when pwd
       (setq default-directory pwd))
     (goto-char pt)

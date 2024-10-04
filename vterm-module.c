@@ -208,7 +208,14 @@ static void fetch_cell(Term *term, int row, int col, VTermScreenCell *cell) {
 
 static char *get_row_directory(Term *term, int row) {
   if (row < 0) {
-    ScrollbackLine *sbrow = term->sb_buffer[-row - 1];
+    int idx = -row - 1;
+    idx = idx < 0 ? 0 : idx > term->sb_size ? term->sb_size : idx;
+    printf("IDX: %d SIZE: %zu CURRENT: %zu\n", idx, term->sb_size,
+           term->sb_current);
+    ScrollbackLine *sbrow = term->sb_buffer[idx];
+    printf("SBROW: %p\n", sbrow);
+    printf("SBROW INFO: %p\n", sbrow->info);
+    printf("SBROW INFO DIRECTORY: %p\n", sbrow->info->directory);
     return sbrow->info->directory;
     /* return term->dirs[0]; */
   } else {
@@ -1395,9 +1402,16 @@ emacs_value Fvterm_set_pty_name(emacs_env *env, ptrdiff_t nargs,
 emacs_value Fvterm_get_pwd(emacs_env *env, ptrdiff_t nargs, emacs_value args[],
                            void *data) {
   Term *term = env->get_user_ptr(env, args[0]);
+  fprintf(stderr, "got term\n");
   int linenum = env->extract_integer(env, args[1]);
+  fprintf(stderr, "got linenum %d\n", linenum);
+  fflush(stderr);
   int row = linenr_to_row(term, linenum);
+  fprintf(stderr, "got linenum->row %d\n", row);
+  fflush(stderr);
   char *dir = get_row_directory(term, row);
+  fprintf(stderr, "got dir %d\n", dir);
+  fflush(stderr);
 
   return dir ? env->make_string(env, dir, strlen(dir)) : Qnil;
 }
